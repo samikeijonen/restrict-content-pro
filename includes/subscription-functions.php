@@ -135,6 +135,85 @@ function rcp_get_subscription_access_level( $id ) {
 	return false;
 }
 
+/**
+ * Retrieve the number of active subscribers on a subscription level
+ *
+ * @since       2.5.1
+ * @access      public
+ * @return      int
+*/
+function rcp_get_subscription_member_count( $id, $status = 'active' ) {
+
+	$key   = 'rcp_sub_' . $id . '_' . $status . '_member_count';
+	$count = get_option( $key );
+
+	if( empty( $count ) && 0 !== $count ) {
+
+		$count = rcp_count_members( $id, $status );
+		update_option( $key, $count );
+
+	}
+
+	return apply_filters( 'rcp_get_subscription_member_count', $count, $id, $status );
+}
+
+/**
+ * Increments the number of active subscribers on a subscription level
+ *
+ * @since       2.5.1
+ * @access      public
+ * @return      void
+*/
+function rcp_increment_subscription_member_count( $id, $status = 'active' ) {
+
+	$key   = 'rcp_sub_' . $id . '_' . $status . '_member_count';
+	$count = rcp_get_subscription_member_count( $id, $status );
+
+	if( empty( $count ) ) {
+
+		$count = 0;
+
+	}
+
+	$count++;
+
+	update_option( $key, (int) $count );
+
+	do_action( 'rcp_increment_subscription_member_count', $id, $count, $status );
+}
+
+/**
+ * Decrements the number of active subscribers on a subscription level
+ *
+ * @since       2.5.1
+ * @access      public
+ * @return      void
+*/
+function rcp_decrement_subscription_member_count( $id, $status = 'active' ) {
+
+	$key   = 'rcp_sub_' . $id . '_' . $status . '_member_count';
+	$count = rcp_get_subscription_member_count( $id, $status );
+
+	if( empty( $count ) ) {
+
+		$count = 0;
+
+	} else {
+
+		$count--;
+
+	}
+
+	if( $count < 0 ) {
+
+		$count = 0;
+
+	}
+
+	update_option( $key, (int) $count );
+
+	do_action( 'rcp_crement_subscription_member_count', $id, $count, $status );
+}
 
 /*
 * Get a formatted duration unit name for subscription lengths
